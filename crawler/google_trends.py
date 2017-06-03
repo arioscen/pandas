@@ -3,18 +3,23 @@ import time
 import datetime
 from dateutil import parser
 import os
+from selenium.common.exceptions import WebDriverException
 
-driver = webdriver.Chrome()
-
-#set start time
-ssday = '2017-01-01'
+ssday = '2010-01-01'
 sday = parser.parse(ssday)
 today = datetime.datetime.now()
 delta = datetime.timedelta(days=1)
 eday = today - 2*delta
+from_path = "/home/ubuntu/Downloads/relatedQueries.csv"
+to_path = "google_trends/"
 
-def get_csv():
+def get_csv(driver):
+    except_count = 0
     while True:
+        #if page block over 60 seconds, refresh it
+        if except_count > 60:
+            driver.refresh()
+            except_count = 0
         try:
             action = driver.find_elements_by_css_selector(".widget-actions-menu.ic_googleplus_reshare.ng-isolate-scope")
             action[1].click()
@@ -23,23 +28,58 @@ def get_csv():
             break
         except IndexError:
             time.sleep(0.1)
+            except_count += 0.1
 
-while sday < eday:
-    tA = sday.strftime('%Y-%m-%d')
-    sday += delta
-    tB = sday.strftime('%Y-%m-%d')
-    url = "https://trends.google.com.tw/trends/explore?date=" + tA + "%20" + tB +"&geo=TW"
-    driver.get(url)
-    time.sleep(1)
-    get_csv()
+def rename(tA):
     while True:
         try:
-	    #set download path and target path
-            from_path = "/home/ubuntu/Downloads/"
-            to_path = "/home/ubuntu/google_trends/"
-            for filename in os.listdir(from_path):
-                if filename.endswith(".csv"):
-                    os.rename(from_path + filename, to_path + tA + ".csv")
-            break
+            if os.path.exists(from_path):
+                os.rename(from_path, to_path + tA + ".csv")
+                break
+            else:
+                time.sleep(0.1)
         except FileNotFoundError:
-            time.sleep(0.1)
+            #save path may not exists
+            if not os.path.exists(to_path):
+                os.mkdir("google_trends")
+
+def csv_save(tA):
+    with open("csv_save.txt", "w") as f:
+        f.write(tA)
+
+def csv_load():
+    global sday
+    if os.path.exists("csv_save.txt"):
+        with open("csv_save.txt", "r") as f:
+            ssday = f.read()
+            sday = parser.parse(ssday)
+
+def clean_file():
+    if os.path.exists("csv_save.txt"):
+        os.remove("csv_save.txt")
+
+def main():
+    global sday
+    driver = webdriver.Chrome()
+    csv_load()
+    try:
+        while sday < eday:
+            tA = sday.strftime('%Y-%m-%d')
+            sday += delta
+            tB = sday.strftime('%Y-%m-%d')
+            url = "https://trends.google.com.tw/trends/explore?date=" + tA + "%20" + tB +"&geo=TW"
+            driver.get(url)
+            time.sleep(1)
+            get_csv(driver)
+            rename(tA)
+            csv_save(tA)
+    #if driver crash, restart
+    except WebDriverException:
+        time.sleep(10)
+        main()
+    clean_file()
+
+main()
+
+
+
