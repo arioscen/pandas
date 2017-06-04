@@ -101,7 +101,7 @@ def clean_file():
 
 #執行用的main方法
 def main():
-    #讀檔會修改到全域變數sday，以global定義
+    #更換日期會修改到全域變數sday，以global定義
     global sday
     #啓動 driver
     driver = webdriver.Chrome()
