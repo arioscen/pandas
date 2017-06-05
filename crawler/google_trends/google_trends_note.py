@@ -23,8 +23,8 @@ sday = parser.parse(ssday)
 today = datetime.datetime.now()
 #間隔爲一天
 delta = datetime.timedelta(days=1)
-#結束日期，google trends 最新資料爲兩天前
-eday = today - 2*delta
+#結束日期
+eday = today - 4*delta
 #chrome driver 的默認下載資料夾
 from_path = "/home/"+user+"/Downloads/relatedQueries.csv"
 #最終的存檔資料夾
@@ -132,8 +132,6 @@ def main():
         time.sleep(10)
         #重新執行main方法
         main()
-    #執行清除方法
-    clean_file()
     #關閉driver
     driver.close()
 #執行main方法

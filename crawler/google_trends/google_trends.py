@@ -11,7 +11,7 @@ ssday = '2010-01-01'
 sday = parser.parse(ssday)
 today = datetime.datetime.now()
 delta = datetime.timedelta(days=1)
-eday = today - 2*delta
+eday = today - 4*delta
 from_path = "/home/"+user+"/Downloads/relatedQueries.csv"
 to_path = "google_trends/"
 
@@ -56,10 +56,6 @@ def csv_load():
             ssday = f.read()
             sday = parser.parse(ssday)
 
-def clean_file():
-    if os.path.exists("csv_save.txt"):
-        os.remove("csv_save.txt")
-
 def main():
     global sday
     driver = webdriver.Chrome()
@@ -79,7 +75,6 @@ def main():
     except WebDriverException:
         time.sleep(10)
         main()
-    clean_file()
     driver.close()
 
 main()
